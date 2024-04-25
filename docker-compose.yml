@@ -1,0 +1,78 @@
+# version: '3.8'
+services:
+  web:
+    build: .
+    container_name: nextjs-shop
+    ports:
+      - "3000:3000"
+      - "4001:4001"
+      - "8079:8079"
+    environment:
+      - DATABASE_URL=postgres://postgres:password@postgres-db:5432/shopdb
+      - REDIS_URL=redis://redis-db:6379
+      - REDIS_TOKEN=secretPassword
+      - HOST=0.0.0.0
+    depends_on:
+      redis-db:
+        condition: service_healthy
+      # - apollo-server
+    networks:
+      - shop-network
+    # depends_on:
+    #   redis-db:
+    #     condition: service_healthy
+    # postgres-db:
+    #   condition: service_healthy
+    # volumes:
+    #   - ./:/app
+
+  redis-db:
+    image: redis:latest
+    container_name: redis-db
+    command: redis-server --requirepass secretPassword
+    ports:
+      - "6379:6379"  # Default port for Redis
+    volumes:
+      - redisdata:/data  # Redis data volume
+    networks:
+      - shop-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "localhost", "-p", "6379", "-a", "secretPassword", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # postgres-db:
+  #   image: postgres:latest
+  #   container_name: postgres-db
+  #   ports:
+  #     - "5432:5432"  # Default port for PostgreSQL
+  #   environment:
+  #     - POSTGRES_DB=shopdb
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=password
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data  # PostgreSQL data volume
+  #   networks:
+  #     - shop-network
+
+  # apollo-server:
+  #   build: ./apollo-server
+  #   ports:
+  #     - "4001:4001"
+  #   environment:
+  #     DATABASE_URL: postgres://postgres:password@postgres-db:5432/shopdb
+  #   depends_on:
+  #     - postgres-db
+  #   networks:
+  #     - shop-network
+
+volumes:
+  redisdata:
+    driver: local
+  pgdata:
+    driver: local
+
+networks:
+  shop-network:
+    driver: bridge
