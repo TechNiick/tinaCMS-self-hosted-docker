@@ -27,7 +27,7 @@
     "next-auth": "^4.24.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "tinacms": "^1.5.24",
+    "tinacms": "^1.6.3",
     "tinacms-authjs": "^1.0.1",
     "tinacms-gitprovider-github": "^1.0.0",
     "typescript": "5.0.4",
